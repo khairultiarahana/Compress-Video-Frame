@@ -1266,6 +1266,9 @@
               ><button class="button outline" id="again" type="button">
                 Atur ulang hasil
               </button>
+              <button class="button secondary" id="another" type="button">
+                Compress video lain
+              </button>
             </div>
             <p class="result-note" id="resultNote"></p>
             <p
@@ -1717,6 +1720,42 @@
           $("targetHint").textContent =
             "Pilih video untuk menghitung estimasi bitrate.";
           error("");
+        }
+        function resetAll() {
+          if (busy || selecting) return;
+
+          // Hapus video, preview, hasil, dan panel proses
+          removeFile();
+
+          // Kembalikan semua pengaturan ke default
+          $("targetMB").value = 100;
+          $("resolution").value = "auto";
+          $("fps").value = "auto";
+          $("audio").value = "copy";
+          $("preset").value = "fast";
+          $("mode").value = "native";
+          refreshSelects();
+
+          // Reset tampilan progres
+          progress = 0;
+          $("bar").style.width = "0%";
+          $("track").classList.remove("indeterminate");
+          $("track").setAttribute("aria-valuenow", "0");
+          $("progressText").textContent = "0%";
+          $("stage").textContent = "Menyiapkan…";
+          $("elapsed").textContent = "Jangan tutup tab selama pemrosesan.";
+          $("liveDetail").textContent = "";
+          $("stallWarning").hidden = true;
+
+          // Reset teks hasil
+          $("resultNote").textContent = "";
+          $("saveStatus").textContent =
+            "File siap. Klik Download video untuk menyimpan.";
+          $("saveStatus").classList.remove("saved");
+          $("regularDownload").hidden = true;
+          $("largeWarning").hidden = true;
+
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }
         function showProgress(value, indeterminate = false) {
           progress = Math.max(progress, Math.min(100, value));
@@ -2576,6 +2615,7 @@
           compress();
         });
         $("cancel").addEventListener("click", cancel);
+        $("another").addEventListener("click", resetAll);
         $("again").addEventListener("click", () => {
           clearOutput();
           $("settingsHeading").scrollIntoView({
