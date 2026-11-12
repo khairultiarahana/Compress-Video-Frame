@@ -1,0 +1,2649 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#245ce7" />
+    <title>Frame — Video Compressor</title>
+    <style>
+      :root {
+        --blue: #245ce7;
+        --blue-dark: #1946b7;
+        --ink: #182338;
+        --muted: #66738a;
+        --line: #dce4f0;
+        --pale: #edf3ff;
+        --bg: #f7f9fd;
+        --white: #fff;
+        --red: #b42318;
+        --green: #14704b;
+        --radius: 16px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button,
+      a,
+      input,
+      select {
+        -webkit-tap-highlight-color: transparent;
+      }
+      button,
+      a {
+        touch-action: manipulation;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid #93b5ff;
+        outline-offset: 4px;
+      }
+      input:focus,
+      select:focus {
+        outline: 3px solid #245ce71b;
+        border-color: var(--blue);
+      }
+      [hidden] {
+        display: none !important;
+      }
+      svg {
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.7;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      button {
+        border: 0;
+      }
+      .shell {
+        width: min(1160px, calc(100% - 64px));
+        margin: auto;
+      }
+      header {
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+      }
+      .nav {
+        min-height: 82px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        font-weight: 760;
+        font-size: 24px;
+        letter-spacing: -1px;
+      }
+      .brand-icon {
+        background: var(--blue);
+        color: #fff;
+        width: 37px;
+        height: 37px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+      }
+      .brand-icon svg {
+        width: 23px;
+        height: 23px;
+      }
+      .brand span:last-child {
+        color: var(--blue);
+      }
+      .privacy {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .privacy svg {
+        width: 17px;
+        height: 17px;
+        color: var(--blue);
+      }
+      main {
+        padding: 55px 0 40px;
+      }
+      .intro {
+        max-width: 750px;
+        margin-bottom: 34px;
+      }
+      .eyebrow {
+        color: var(--blue);
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      h1 {
+        font-size: clamp(32px, 4vw, 49px);
+        line-height: 1.15;
+        font-weight: 740;
+        letter-spacing: -1.9px;
+        margin-bottom: 15px;
+      }
+      .intro > p:last-child {
+        color: var(--muted);
+        max-width: 600px;
+        font-size: 16px;
+      }
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+        gap: 24px;
+        align-items: start;
+      }
+      .panel {
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+        min-width: 0;
+      }
+      .panel-head {
+        padding: 23px 26px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .step {
+        width: 26px;
+        height: 26px;
+        display: grid;
+        place-items: center;
+        background: var(--pale);
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 750;
+        border-radius: 7px;
+      }
+      .panel-head h2 {
+        font-size: 17px;
+        font-weight: 650;
+        letter-spacing: -0.3px;
+      }
+      .panel-body {
+        padding: 26px;
+      }
+      .drop {
+        border: 1.5px dashed #b5c9eb;
+        border-radius: 12px;
+        min-height: 280px;
+        padding: 30px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: #fbfcff;
+        transition: background 0.2s, border-color 0.2s, transform 0.2s;
+      }
+      .drop.over {
+        border-color: var(--blue);
+        background: #edf3ff;
+        transform: scale(0.99);
+      }
+      .upload-icon {
+        width: 60px;
+        height: 60px;
+        display: grid;
+        place-items: center;
+        background: var(--pale);
+        color: var(--blue);
+        border-radius: 16px;
+        margin: 0 auto 18px;
+      }
+      .upload-icon svg {
+        width: 29px;
+        height: 29px;
+      }
+      .drop h3 {
+        font-size: 18px;
+        font-weight: 630;
+        margin-bottom: 5px;
+      }
+      .drop p {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 17px;
+      }
+      .button {
+        min-height: 46px;
+        padding: 11px 19px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        font-weight: 650;
+        font-size: 14px;
+        text-decoration: none;
+        transition: transform 0.18s, background 0.18s, box-shadow 0.18s;
+        color: var(--ink);
+        background: #eff3f9;
+      }
+      .button.primary {
+        background: var(--blue);
+        color: #fff;
+      }
+      .button.secondary {
+        background: var(--pale);
+        color: var(--blue);
+      }
+      .button.outline {
+        background: #fff;
+        border: 1px solid var(--line);
+      }
+      .button svg {
+        width: 19px;
+        height: 19px;
+      }
+      .button.wide {
+        width: 100%;
+      }
+      .format-note {
+        font-size: 12px;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 13px;
+      }
+      .file-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .file-icon {
+        width: 42px;
+        height: 48px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: var(--pale);
+        color: var(--blue);
+        flex-shrink: 0;
+      }
+      .file-text {
+        flex: 1;
+        min-width: 0;
+      }
+      .file-text strong {
+        font-size: 14px;
+        font-weight: 650;
+        display: block;
+        overflow-wrap: anywhere;
+      }
+      .file-text small {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .icon-button {
+        background: transparent;
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        color: var(--muted);
+        transition: background 0.2s, transform 0.2s;
+      }
+      .icon-button svg {
+        width: 19px;
+        height: 19px;
+      }
+      .preview {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16/10;
+        background: #111a2a;
+        border-radius: 10px;
+        object-fit: contain;
+      }
+      .file-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 18px;
+        gap: 12px;
+      }
+      .file-stats span,
+      .stat-label {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .file-stats strong {
+        display: block;
+        font-size: 14px;
+        font-weight: 650;
+        margin-top: 3px;
+      }
+      .local-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 20px;
+      }
+      .local-note svg {
+        color: var(--blue);
+        width: 17px;
+        height: 17px;
+        margin-top: 2px;
+      }
+      fieldset {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        min-width: 0;
+      }
+      label,
+      .field-title {
+        display: block;
+        font-weight: 650;
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+      .label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 9px;
+      }
+      .label-row label {
+        margin: 0;
+      }
+      .small-tag {
+        background: var(--pale);
+        color: var(--blue);
+        font-size: 10px;
+        padding: 3px 7px;
+        border-radius: 4px;
+        font-weight: 650;
+      }
+      .target-wrap {
+        display: flex;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .target-wrap:focus-within {
+        outline: 3px solid #245ce71b;
+        border-color: var(--blue);
+      }
+      .target-wrap input {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        background: #fff;
+        color: var(--ink);
+        font-size: 29px;
+        font-weight: 650;
+        letter-spacing: -0.8px;
+        padding: 13px 16px;
+        outline: none;
+      }
+      .target-wrap input:focus {
+        outline: none;
+      }
+      .target-wrap span {
+        padding: 0 17px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .quick {
+        display: flex;
+        gap: 8px;
+        margin: 11px 0 9px;
+      }
+      .quick button {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 5px 10px;
+        font-size: 12px;
+        color: var(--muted);
+        transition: transform 0.18s, border-color 0.18s, color 0.18s;
+      }
+      .quick button.active {
+        background: var(--pale);
+        border-color: #b2c9fb;
+        color: var(--blue);
+      }
+      .hint {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .estimate {
+        background: #f4f7fd;
+        border-radius: 9px;
+        padding: 13px 14px;
+        margin: 18px 0 23px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 12px;
+      }
+      .estimate strong {
+        color: var(--blue);
+        font-size: 14px;
+      }
+      .settings-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      select {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        height: 45px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        padding: 0 10px;
+        font-size: 13px;
+      }
+      .field {
+        min-width: 0;
+      }
+      .mode-field {
+        margin-top: 18px;
+      }
+      .quality-note {
+        margin: 15px 0 22px;
+        font-size: 12px;
+        color: var(--muted);
+        border-left: 2px solid #c8d8fa;
+        padding-left: 11px;
+      }
+      .settings-foot {
+        padding-top: 19px;
+        border-top: 1px solid var(--line);
+      }
+      .settings-foot > .hint {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 11px;
+      }
+      .warning {
+        margin: 14px 0;
+        padding: 11px 13px;
+        background: #fff7e7;
+        border: 1px solid #f2ddb1;
+        border-radius: 8px;
+        color: #855517;
+        font-size: 12px;
+      }
+      .message {
+        margin: 0 0 20px;
+        padding: 13px 16px;
+        border-radius: 9px;
+        background: #fff0ef;
+        border: 1px solid #f6c9c3;
+        color: var(--red);
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+      .process {
+        border-top: 1px solid var(--line);
+        padding: 22px 26px;
+      }
+      .progress-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 13px;
+        margin-bottom: 10px;
+      }
+      .progress-head strong {
+        color: var(--blue);
+      }
+      .track {
+        height: 6px;
+        background: #e9eff9;
+        border-radius: 5px;
+        overflow: hidden;
+      }
+      .bar {
+        height: 100%;
+        width: 0;
+        background: var(--blue);
+        border-radius: 5px;
+        transition: width 0.3s;
+      }
+      .track.indeterminate .bar {
+        width: 35% !important;
+        animation: loading 1.5s ease-in-out infinite;
+      }
+      .process-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-top: 13px;
+      }
+      .process-bottom p {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .text-button {
+        background: transparent;
+        padding: 6px 0 6px 10px;
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 650;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+      }
+      .result {
+        grid-column: 1/-1;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 30px;
+        padding: 28px;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+      }
+      .success-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--green);
+        font-weight: 650;
+        margin-bottom: 8px;
+      }
+      .success-label svg {
+        width: 18px;
+        height: 18px;
+      }
+      .result h2 {
+        font-size: 25px;
+        line-height: 1.3;
+        letter-spacing: -0.7px;
+        margin-bottom: 18px;
+      }
+      .result-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+      .result-stats strong {
+        display: block;
+        font-size: 19px;
+        line-height: 1.4;
+        margin-top: 4px;
+        letter-spacing: -0.5px;
+      }
+      .result .preview {
+        aspect-ratio: 16/9;
+        max-height: 320px;
+      }
+      .result-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .result-note {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 12px;
+      }
+      .guide {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 30px;
+        margin: 35px 0;
+      }
+      .guide-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+      }
+      .guide-item > svg {
+        width: 19px;
+        height: 19px;
+        color: var(--blue);
+        margin-top: 3px;
+      }
+      .guide-item strong {
+        display: block;
+        font-size: 12px;
+        font-weight: 650;
+      }
+      .guide-item p {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .faq {
+        border-top: 1px solid var(--line);
+        padding-top: 22px;
+        margin-top: 12px;
+      }
+      summary {
+        font-size: 13px;
+        font-weight: 650;
+        cursor: pointer;
+        padding: 8px 0;
+      }
+      .faq p {
+        max-width: 850px;
+        color: var(--muted);
+        font-size: 12px;
+        padding: 8px 0 12px;
+      }
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 22px 0;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      @keyframes loading {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(390%);
+        }
+      }
+      @media (hover: hover) {
+        .button:not(:disabled):hover {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 13px #17386a16;
+        }
+        .button.primary:not(:disabled):hover {
+          background: var(--blue-dark);
+        }
+        .quick button:not(:disabled):hover {
+          transform: translateY(-2px);
+          border-color: var(--blue);
+          color: var(--blue);
+        }
+        .icon-button:not(:disabled):hover {
+          background: var(--pale);
+          transform: scale(1.06);
+        }
+        .drop:hover {
+          border-color: var(--blue);
+        }
+        .text-button:hover {
+          color: var(--blue-dark);
+        }
+      }
+      @media (min-width: 1600px) {
+        .shell {
+          width: min(1280px, calc(100% - 96px));
+        }
+        main {
+          padding-top: 70px;
+        }
+        .panel-body {
+          padding: 30px;
+        }
+        .drop {
+          min-height: 310px;
+        }
+      }
+      @media (max-width: 900px) {
+        .shell {
+          width: calc(100% - 40px);
+        }
+        .workspace {
+          gap: 18px;
+        }
+        .panel-head,
+        .panel-body {
+          padding: 20px;
+        }
+        .settings-grid {
+          gap: 12px;
+        }
+        .process {
+          padding: 20px;
+        }
+        .result {
+          gap: 20px;
+          padding: 22px;
+        }
+        .guide {
+          gap: 18px;
+        }
+        h1 {
+          letter-spacing: -1.3px;
+        }
+      }
+      @media (max-width: 720px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+        .intro {
+          margin-bottom: 26px;
+        }
+        main {
+          padding-top: 35px;
+        }
+        .nav {
+          min-height: 70px;
+        }
+        .privacy {
+          font-size: 11px;
+        }
+        .privacy .desktop-copy {
+          display: none;
+        }
+        .drop {
+          min-height: 240px;
+        }
+        .result {
+          grid-template-columns: 1fr;
+        }
+        .result-media {
+          order: -1;
+        }
+        .guide {
+          grid-template-columns: 1fr;
+          gap: 18px;
+          margin: 26px 0;
+        }
+        .guide-item p {
+          margin-top: 1px;
+        }
+        .file-stats strong {
+          font-size: 13px;
+        }
+      }
+      @media (max-width: 380px) {
+        .shell {
+          width: calc(100% - 28px);
+        }
+        .panel-body,
+        .panel-head,
+        .process {
+          padding: 17px;
+        }
+        .settings-grid {
+          grid-template-columns: 1fr;
+        }
+        .result {
+          padding: 17px;
+        }
+        .result-stats strong {
+          font-size: 16px;
+        }
+        .privacy {
+          max-width: 110px;
+          line-height: 1.4;
+        }
+        h1 {
+          font-size: 30px;
+        }
+        .button {
+          padding-inline: 14px;
+        }
+        .result-actions .button {
+          width: 100%;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
+      /* Native selects only hold values; every visible dropdown is custom. */
+      .select-control {
+        position: relative;
+        width: 100%;
+        min-width: 0;
+      }
+      .select-trigger {
+        display: block;
+        text-align: left;
+        position: relative;
+        width: 100%;
+        min-height: 46px;
+        padding: 11px 44px 11px 13px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .select-value {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .select-trigger > svg {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        width: 15px;
+        height: 15px;
+        transform: translateY(-50%);
+        pointer-events: none;
+        transition: transform 0.18s;
+      }
+      .select-trigger[aria-expanded="true"] {
+        border-color: var(--blue);
+        outline: 3px solid #245ce71b;
+      }
+      .select-trigger[aria-expanded="true"] > svg {
+        transform: translateY(-50%) rotate(180deg);
+      }
+      .select-menu {
+        position: fixed;
+        z-index: 9999;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 5px;
+        overflow: auto;
+        overscroll-behavior: contain;
+        box-shadow: 0 9px 28px #1a346521;
+        scrollbar-width: thin;
+        scrollbar-color: #b7c7e4 #f3f6fb;
+      }
+      .select-option {
+        position: relative;
+        min-height: 42px;
+        padding: 10px 32px 10px 11px;
+        font-size: 12px;
+        line-height: 1.5;
+        border-radius: 6px;
+        cursor: pointer;
+        color: var(--ink);
+        overflow-wrap: anywhere;
+      }
+      .select-option[aria-selected="true"] {
+        color: var(--blue);
+        font-weight: 650;
+      }
+      .select-option[aria-selected="true"]::after {
+        content: "✓";
+        position: absolute;
+        right: 12px;
+        top: 10px;
+      }
+      .select-option.is-active,
+      .select-option:hover {
+        background: var(--pale);
+      }
+      #liveDetail {
+        margin-top: 5px;
+        overflow-wrap: anywhere;
+      }
+      #saveStatus.saved {
+        color: var(--green);
+        font-weight: 650;
+      }
+      .result .text-button {
+        display: inline-block;
+        padding: 8px 0;
+      }
+      #stallWarning {
+        margin-bottom: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      style="display: none"
+      aria-hidden="true"
+    >
+      <symbol id="i-upload" viewBox="0 0 24 24">
+        <path
+          d="M12 16V3m-5 5 5-5 5 5M4 15v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"
+        />
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24">
+        <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z" />
+        <path d="m8 12 3 3 5-6" />
+      </symbol>
+      <symbol id="i-video" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="13" height="14" rx="2" />
+        <path d="m16 10 5-3v10l-5-3M7 9h5M7 13h3" />
+      </symbol>
+      <symbol id="i-close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12M6 18 18 6" />
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M4 12h16m-6-6 6 6-6 6" />
+      </symbol>
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M12 3v13m-5-5 5 5 5-5M4 16v5h16v-5" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <path d="m5 12 4 4L19 6" />
+      </symbol>
+      <symbol id="i-sliders" viewBox="0 0 24 24">
+        <path d="M4 7h7m4 0h5M4 17h3m4 0h9" />
+        <circle cx="13" cy="7" r="2" />
+        <circle cx="9" cy="17" r="2" />
+      </symbol>
+    </svg>
+    <header>
+      <div class="shell nav">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg aria-hidden="true"><use href="#i-video" /></svg>
+          </div>
+          <div>frame<span>.</span></div>
+        </div>
+        <div class="privacy">
+          <svg aria-hidden="true"><use href="#i-shield" /></svg
+          ><span
+            >Diproses di perangkatmu<span class="desktop-copy"
+              >. Tanpa upload.</span
+            ></span
+          >
+        </div>
+      </div>
+    </header>
+    <main class="shell">
+      <section class="intro">
+        <p class="eyebrow">VIDEO COMPRESSOR</p>
+        <h1>Lebih ringan.<br />Tetap enak dilihat.</h1>
+        <p>
+          Tentukan ukuran videomu sendiri. Atur resolusi dan audio, lalu simpan
+          hasilnya langsung dari browser.
+        </p>
+      </section>
+      <div id="error" class="message" role="alert" hidden></div>
+      <div class="workspace">
+        <section class="panel" aria-labelledby="uploadHeading">
+          <div class="panel-head">
+            <span class="step">01</span>
+            <h2 id="uploadHeading">Pilih videomu</h2>
+          </div>
+          <div class="panel-body">
+            <input
+              id="fileInput"
+              type="file"
+              accept="video/*,.mp4,.mov,.m4v,.webm,.mkv,.avi"
+              class="sr-only"
+              aria-label="Pilih file video"
+              tabindex="-1"
+            />
+            <div class="drop" id="dropZone">
+              <div>
+                <div class="upload-icon">
+                  <svg aria-hidden="true"><use href="#i-upload" /></svg>
+                </div>
+                <h3>Tarik video ke sini</h3>
+                <p>atau pilih file dari perangkatmu</p>
+                <button class="button primary" id="chooseFile" type="button">
+                  Pilih video
+                  <svg aria-hidden="true"><use href="#i-arrow" /></svg>
+                </button>
+              </div>
+            </div>
+            <p class="format-note" id="formatNote">
+              MP4, MOV, WebM & lainnya yang didukung browser
+            </p>
+            <div id="filePanel" hidden>
+              <div class="file-head">
+                <div class="file-icon">
+                  <svg aria-hidden="true"><use href="#i-video" /></svg>
+                </div>
+                <div class="file-text">
+                  <strong id="fileName"></strong><small id="fileInfo"></small>
+                </div>
+                <button
+                  type="button"
+                  id="removeFile"
+                  class="icon-button"
+                  aria-label="Hapus video"
+                >
+                  <svg aria-hidden="true"><use href="#i-close" /></svg>
+                </button>
+              </div>
+              <video
+                id="inputPreview"
+                class="preview"
+                controls
+                playsinline
+                preload="metadata"
+              ></video>
+              <div class="file-stats">
+                <div>
+                  <span>Ukuran asli</span><strong id="originalSize">—</strong>
+                </div>
+                <div><span>Durasi</span><strong id="duration">—</strong></div>
+                <div>
+                  <span>Resolusi</span><strong id="dimensions">—</strong>
+                </div>
+              </div>
+              <p class="warning" id="largeWarning" hidden>
+                File besar memerlukan banyak RAM. Jika browser berhenti atau
+                menutup tab, gunakan komputer dengan memori lebih besar.
+              </p>
+            </div>
+            <div class="local-note">
+              <svg aria-hidden="true"><use href="#i-shield" /></svg>
+              <p>
+                Video tetap di perangkatmu. Tidak ada akun, database, atau
+                pengiriman video ke server.
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="panel" aria-labelledby="settingsHeading">
+          <div class="panel-head">
+            <span class="step">02</span>
+            <h2 id="settingsHeading">Atur hasil kompresi</h2>
+          </div>
+          <div class="panel-body">
+            <fieldset id="settings" disabled>
+              <div class="label-row">
+                <label for="targetMB">Target ukuran</label
+                ><span class="small-tag">OUTPUT MP4</span>
+              </div>
+              <div class="target-wrap">
+                <input
+                  id="targetMB"
+                  type="number"
+                  inputmode="decimal"
+                  min="0.1"
+                  step="0.1"
+                  value="100"
+                  aria-describedby="targetHint"
+                /><span>MB</span>
+              </div>
+              <div class="quick" aria-label="Persentase ukuran asli">
+                <button type="button" data-ratio="0.25">25% dari asli</button
+                ><button type="button" data-ratio="0.5">50%</button
+                ><button type="button" data-ratio="0.75">75%</button>
+              </div>
+              <p class="hint" id="targetHint">
+                Pilih video untuk menghitung estimasi bitrate.
+              </p>
+              <div class="estimate">
+                <span>Estimasi pengurangan ukuran</span
+                ><strong id="savingEstimate">—</strong>
+              </div>
+              <div class="settings-grid">
+                <div class="field">
+                  <label for="resolution">Resolusi</label
+                  ><select id="resolution">
+                    <option value="auto">Otomatis · lebih cepat</option>
+                    <option value="0">Sama seperti asli</option>
+                    <option value="1920">Maks. 1080p</option>
+                    <option value="1280">Maks. 720p</option>
+                    <option value="854">Maks. 480p</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="fps">Frame rate</label
+                  ><select id="fps">
+                    <option value="auto">Otomatis · maks. 30 fps</option>
+                    <option value="0">Sama seperti asli</option>
+                    <option value="30">30 fps</option>
+                    <option value="24">24 fps</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="audio">Audio</label
+                  ><select id="audio">
+                    <option value="copy">Pertahankan audio asli</option>
+                    <option value="128">Pertahankan · 128 kbps</option>
+                    <option value="96">Ringan · 96 kbps</option>
+                    <option value="64">Minimum · 64 kbps</option>
+                    <option value="0">Hapus audio</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="preset">Prioritas pemrosesan</label
+                  ><select id="preset">
+                    <option value="fast" selected>Kecepatan</option>
+                    <option value="medium">Kualitas seimbang</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mode-field">
+                <label for="mode">Metode kompresi</label
+                ><select id="mode">
+                  <option value="native">
+                    Cepat · WebCodecs (rekomendasi)
+                  </option>
+                  <option value="wasm">Kompatibilitas · FFmpeg cepat</option>
+                  <option value="wasm2">
+                    Dua tahap · FFmpeg (paling lama)
+                  </option>
+                </select>
+              </div>
+              <p id="engineInfo" class="quality-note">
+                Mode cepat menggunakan encoder browser dan akselerasi hardware
+                jika tersedia. Resolusi otomatis menyesuaikan target ukuran;
+                pilih Sama seperti asli jika ingin mempertahankan resolusi.
+              </p>
+            </fieldset>
+            <div class="settings-foot">
+              <button
+                class="button primary wide"
+                id="compress"
+                type="button"
+                disabled
+              >
+                Kompres video
+                <svg aria-hidden="true"><use href="#i-arrow" /></svg>
+              </button>
+              <p class="hint">
+                Hasil mendekati target, bukan jaminan ukuran persis.
+              </p>
+            </div>
+          </div>
+          <div class="process" id="process" hidden>
+            <div class="progress-head">
+              <span id="stage" role="status" aria-live="polite"
+                >Menyiapkan…</span
+              ><strong id="progressText">0%</strong>
+            </div>
+            <div
+              class="track"
+              id="track"
+              role="progressbar"
+              aria-label="Progres kompresi"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <div id="bar" class="bar"></div>
+            </div>
+            <div class="process-bottom">
+              <div>
+                <p id="elapsed">Jangan tutup tab selama pemrosesan.</p>
+                <p id="liveDetail"></p>
+              </div>
+              <button id="cancel" type="button" class="text-button">
+                Batalkan
+              </button>
+            </div>
+            <p id="stallWarning" class="warning" hidden></p>
+          </div>
+        </section>
+        <section
+          class="result"
+          id="result"
+          aria-labelledby="resultTitle"
+          hidden
+        >
+          <div>
+            <div class="success-label">
+              <svg aria-hidden="true"><use href="#i-check" /></svg>KOMPRESI
+              SELESAI
+            </div>
+            <h2 id="resultTitle">Videomu siap disimpan.</h2>
+            <div class="result-stats">
+              <div>
+                <span class="stat-label">Ukuran asli</span
+                ><strong id="resultOriginal">—</strong>
+              </div>
+              <div>
+                <span class="stat-label">Ukuran hasil</span
+                ><strong id="resultSize">—</strong>
+              </div>
+              <div>
+                <span class="stat-label">Lebih ringan</span
+                ><strong id="resultSaving">—</strong>
+              </div>
+            </div>
+            <div class="result-actions">
+              <a
+                class="button primary"
+                id="download"
+                download="video-compressed.mp4"
+                ><svg aria-hidden="true"><use href="#i-download" /></svg
+                >Download video</a
+              ><button class="button outline" id="again" type="button">
+                Atur ulang hasil
+              </button>
+            </div>
+            <p class="result-note" id="resultNote"></p>
+            <p
+              class="result-note"
+              id="saveStatus"
+              role="status"
+              aria-live="polite"
+            >
+              File siap. Klik Download video untuk menyimpan.
+            </p>
+            <a class="text-button" id="regularDownload" hidden
+              >Download melalui browser</a
+            >
+          </div>
+          <div class="result-media">
+            <video
+              id="outputPreview"
+              class="preview"
+              controls
+              playsinline
+              preload="metadata"
+            ></video>
+          </div>
+        </section>
+      </div>
+      <div class="guide">
+        <div class="guide-item">
+          <svg aria-hidden="true"><use href="#i-sliders" /></svg>
+          <div>
+            <strong>Ukuran sesuai kebutuhan</strong>
+            <p>Tentukan target MB dan sesuaikan detail hasilnya.</p>
+          </div>
+        </div>
+        <div class="guide-item">
+          <svg aria-hidden="true"><use href="#i-shield" /></svg>
+          <div>
+            <strong>Privat di perangkatmu</strong>
+            <p>File video diproses lokal melalui WebAssembly.</p>
+          </div>
+        </div>
+        <div class="guide-item">
+          <svg aria-hidden="true"><use href="#i-download" /></svg>
+          <div>
+            <strong>Langsung download</strong>
+            <p>Hasil MP4 tanpa watermark tambahan.</p>
+          </div>
+        </div>
+      </div>
+      <details class="faq">
+        <summary>Yang perlu diketahui sebelum kompresi</summary>
+        <p>
+          Mode cepat memakai WebCodecs melalui Mediabunny, dengan encoder
+          hardware jika browser/perangkat mendukung. Kompresi tidak harus
+          menunggu video diputar secara real time. Kecepatan tetap bergantung
+          pada durasi, codec, resolusi, dan perangkat. Jika codec tidak
+          didukung, pilih mode FFmpeg secara manual; mode ini lebih lambat dan
+          memuat mesin sekitar 32 MB. Semua pemrosesan tetap lokal tanpa upload
+          video. Jalankan melalui localhost atau HTTPS. Target MB merupakan
+          estimasi, bukan jaminan ukuran persis; periksa ukuran aktual dan
+          preview hasil. MB = 1.000.000 byte. Saat browser mendukung dialog
+          Simpan, aplikasi dapat mengonfirmasi file telah ditulis; untuk
+          download biasa, periksa daftar Downloads browser.
+        </p>
+      </details>
+    </main>
+    <footer>
+      <div class="shell footer-inner">
+        <span>frame. — Ukuran lebih kecil, ruang lebih lega.</span
+        ><span>HTML + CSS + JavaScript · WebCodecs + FFmpeg.wasm</span>
+      </div>
+    </footer>
+    <script id="nativeWorker" type="text/plain">
+      // Runs in a dedicated module worker. Hardware acceleration is a browser hint,
+      // not a guarantee; codec support is checked before the conversion starts.
+      const LIB = 'https://cdn.jsdelivr.net/npm/mediabunny@1.65.2/dist/bundles/mediabunny.mjs';
+      const send = (type, data = {}) => self.postMessage({ type, ...data });
+      let input, conversion;
+      self.onmessage = async ({ data: c }) => {
+        try {
+          send('phase', { text: 'Memuat mesin WebCodecs…' });
+          if (!self.VideoEncoder || !self.VideoDecoder) throw Error('WebCodecs tidak tersedia. Gunakan Chrome/Edge terbaru melalui localhost atau HTTPS, atau pilih mode FFmpeg.');
+          const M = await import(LIB);
+          input = new M.Input({ source: new M.BlobSource(c.file), formats: M.ALL_FORMATS });
+          send('phase', { text: 'Membaca codec dan metadata…' });
+          const video = await input.getPrimaryVideoTrack();
+          const audio = await input.getPrimaryAudioTrack();
+          if (!video || !(await video.canDecode())) throw Error('Codec video ini belum dapat didekode oleh browser. Pilih mode FFmpeg atau gunakan video MP4 H.264.');
+          const w = await video.getDisplayWidth(), h = await video.getDisplayHeight();
+          const videoDuration = await video.getDurationFromMetadata() || c.duration;
+          const stats = await video.computePacketStats(120);
+          const sourceFPS = Number.isFinite(stats.averagePacketRate) && stats.averagePacketRate > 0 ? stats.averagePacketRate : 30;
+          const fps = c.fps === 'auto' ? Math.min(30, sourceFPS) : c.fps === '0' ? sourceFPS : Math.min(Number(c.fps), sourceFPS);
+          let audioRate = 0, audioOptions = { discard: true };
+          if (audio && c.audio !== '0') {
+            const codec = await audio.getCodec();
+            if (c.audio === 'copy') {
+              // Copying AAC avoids unnecessary decoding/encoding and preserves audio.
+              if (codec !== 'aac') throw Error('Mode audio asli pada jalur cepat memerlukan AAC. Pilih audio 96/128 kbps, Hapus audio, atau mode FFmpeg.');
+              audioRate = (await audio.computePacketStats()).averageBitrate;
+              if (!Number.isFinite(audioRate)) throw Error('Bitrate audio tidak dapat dihitung. Pilih audio 96 kbps atau Hapus audio.');
+              audioOptions = {};
+            } else {
+              audioRate = Number(c.audio) * 1000;
+              const channels = Math.min(2, await audio.getNumberOfChannels());
+              const rate = await audio.getSampleRate();
+              if (!(await M.canEncodeAudio('aac', { numberOfChannels: channels, sampleRate: rate, quality: new M.Quality(audioRate) }))) {
+                throw Error('Encoder AAC tidak tersedia di browser ini. Pilih Pertahankan audio asli untuk sumber AAC, Hapus audio, atau mode FFmpeg.');
+              }
+              audioOptions = { codec: 'aac', quality: new M.Quality(audioRate), forceTranscode: true, numberOfChannels: channels };
+            }
+          }
+          const bitrate = Math.floor(c.target * 8 * .94 / c.duration - audioRate);
+          if (bitrate < 80000) throw Error('Target terlalu kecil setelah memperhitungkan audio. Naikkan ukuran target atau hapus audio.');
+          let edge = Number(c.resolution);
+          if (c.resolution === 'auto') {
+            const ceiling = c.preset === 'fast' ? 1280 : 1920;
+            // Match pixel count to the available bitrate instead of encoding unnecessary 4K frames.
+            const availablePixels = bitrate / (Math.max(1, fps) * .075);
+            const ratio = w / h;
+            const suggestedW = Math.sqrt(availablePixels * ratio);
+            const suggestedH = suggestedW / ratio;
+            edge = Math.min(ceiling, Math.max(320, Math.max(suggestedW, suggestedH)));
+          }
+          const scale = edge > 0 ? Math.min(1, edge / Math.max(w, h)) : 1;
+          const width = Math.max(2, Math.floor(w * scale / 2) * 2);
+          const height = Math.max(2, Math.floor(h * scale / 2) * 2);
+          let quality = new M.Quality({ bitrate, bitrateMode: 'constant' });
+          let acceleration = 'prefer-hardware';
+          let config = { width, height, frameRate: fps, quality, hardwareAcceleration: acceleration };
+          if (!(await M.canEncodeVideo('avc', config))) {
+            acceleration = 'no-preference'; config.hardwareAcceleration = acceleration;
+            if (!(await M.canEncodeVideo('avc', config))) {
+              quality = new M.Quality({ bitrate, bitrateMode: 'variable' }); config.quality = quality;
+              if (!(await M.canEncodeVideo('avc', config))) throw Error('Encoder MP4 H.264 untuk ukuran ini tidak tersedia. Turunkan resolusi atau pilih mode FFmpeg.');
+            }
+          }
+          // Use no-preference for decoding as well as encoding if the source codec
+          // cannot be decoded in hardware. Browsers may still use available hardware.
+          const decoderConfig = await video.getDecoderConfig();
+          if (acceleration === 'prefer-hardware' && decoderConfig) {
+            const support = await VideoDecoder.isConfigSupported({ ...decoderConfig, hardwareAcceleration: 'prefer-hardware' }).catch(() => ({ supported: false }));
+            if (!support.supported) acceleration = 'no-preference';
+          }
+          send('config', { width, height, fps, bitrate, engine: acceleration === 'prefer-hardware' ? 'WebCodecs · prioritas hardware' : 'WebCodecs · encoder browser' });
+          const target = new M.BufferTarget();
+          const output = new M.Output({ format: new M.Mp4OutputFormat({ fastStart: 'in-memory' }), target });
+          conversion = await M.Conversion.init({
+            input, output, tracks: 'primary',
+            video: { codec: 'avc', quality, width, height, fit: 'contain', frameRate: fps, forceTranscode: true, hardwareAcceleration: acceleration, keyFrameInterval: 3 },
+            audio: audioOptions, tags: {}
+          });
+          if (!conversion.isValid || !conversion.utilizedTracks.includes(video)) throw Error('Konfigurasi video tidak didukung oleh browser. Coba mode FFmpeg.');
+          if (audio && c.audio !== '0' && !conversion.utilizedTracks.includes(audio)) throw Error('Audio tidak dapat dipertahankan. Pilih Hapus audio atau mode FFmpeg.');
+          let lastSent = 0;
+          send('phase', { text: 'Mengompres dengan encoder browser…', encoding: true });
+          conversion.onProgress = (fraction, processedTime) => {
+            const now = performance.now();
+            if (now - lastSent < 160 && fraction < 1) return;
+            lastSent = now;
+            send('progress', { fraction, seconds: Math.max(0, processedTime), duration: videoDuration });
+          };
+          await conversion.execute();
+          send('phase', { text: 'Memeriksa file MP4…', finalizing: true });
+          const buffer = target.buffer;
+          if (!buffer?.byteLength) throw Error('Hasil kompresi kosong. Coba pengaturan lain.');
+          const check = new M.Input({ source: new M.BufferSource(buffer), formats: [M.MP4] });
+          let actualDuration;
+          try {
+            const outVideo = await check.getPrimaryVideoTrack();
+            if (!outVideo) throw Error('Track video hasil tidak ditemukan.');
+            actualDuration = await outVideo.computeDuration();
+            if (!Number.isFinite(actualDuration) || actualDuration < videoDuration - Math.max(.5, videoDuration * .02)) {
+              throw Error('Durasi hasil terpotong. File tidak ditandai selesai. Coba mode FFmpeg.');
+            }
+          } finally { check.dispose(); }
+          input.dispose(); input = null;
+          self.postMessage({ type: 'done', buffer, duration: actualDuration, width, height, fps }, [buffer]);
+        } catch (err) {
+          try { await conversion?.cancel(); } catch (_) {}
+          try { input?.dispose(); } catch (_) {}
+          send('error', { message: String(err?.message || err) });
+        }
+      };
+    </script>
+    <script>
+      /*
+       * Single-file interface. The FFmpeg JS/worker/WASM dependencies load from CDN
+       * only when Compress is clicked. Native WebCodecs is the fast default. No application server or database is used.
+       * Serve through HTTPS or localhost. Keep these package versions pinned together.
+       */
+      (() => {
+        "use strict";
+        const $ = (id) => document.getElementById(id);
+        const MB = 1000000;
+        const CDN = "https://cdn.jsdelivr.net/npm";
+        const WRAPPER = CDN + "/@ffmpeg/ffmpeg@0.12.10/dist/umd";
+        const CORE = CDN + "/@ffmpeg/core@0.12.6/dist/esm";
+        let selected = null,
+          meta = null,
+          inputURL = "",
+          outputURL = "";
+        let busy = false,
+          selecting = false,
+          selectionId = 0,
+          taskId = 0;
+        let engine = null,
+          controller = null,
+          timer = null;
+        let assetURLs = [],
+          progress = 0,
+          pass = 0,
+          passes = 2,
+          startedAt = 0;
+        let scriptPromise = null,
+          logs = [];
+        let nativeWorker = null,
+          rejectTask = null,
+          outputBlob = null,
+          lastActivity = 0,
+          processedSeconds = 0,
+          actualConfig = null,
+          encodeStarted = 0,
+          abortReason = "";
+
+        const size = (n) =>
+          n >= MB
+            ? (n / MB).toLocaleString("id-ID", { maximumFractionDigits: 2 }) +
+              " MB"
+            : (n / 1000).toLocaleString("id-ID", { maximumFractionDigits: 1 }) +
+              " KB";
+        const durationText = (seconds) => {
+          const s = Math.max(0, Math.round(seconds));
+          return (
+            (s >= 3600 ? Math.floor(s / 3600) + ":" : "") +
+            String(Math.floor(s / 60) % 60).padStart(2, "0") +
+            ":" +
+            String(s % 60).padStart(2, "0")
+          );
+        };
+        function error(message) {
+          $("error").textContent = message;
+          $("error").hidden = !message;
+        }
+        function clearOutput() {
+          $("outputPreview").pause();
+          $("outputPreview").removeAttribute("src");
+          $("outputPreview").load();
+          if (outputURL) URL.revokeObjectURL(outputURL);
+          outputURL = "";
+          outputBlob = null;
+          $("result").hidden = true;
+          $("download").removeAttribute("href");
+        }
+        function setBusy(value) {
+          busy = value;
+          $("settings").disabled = value || !meta;
+          $("compress").disabled = value || !meta;
+          $("removeFile").disabled = value;
+          $("chooseFile").disabled = value || selecting;
+          $("fileInput").disabled = value || selecting;
+          $("again").disabled = value;
+          $("compress").textContent = value
+            ? "Video sedang diproses…"
+            : "Kompres video →";
+          $("cancel").disabled = false;
+          refreshSelects();
+        }
+        function updateEstimate() {
+          if (!selected || !meta) return;
+          const target = Number($("targetMB").value);
+          const audioRate =
+            $("audio").value === "copy" ? 0 : Number($("audio").value) * 1000;
+          const videoRate = Math.floor(
+            (target * MB * 8 * 0.94) / meta.duration - audioRate
+          );
+          const valid =
+            Number.isFinite(target) &&
+            target > 0 &&
+            target * MB < selected.size;
+          $("savingEstimate").textContent = valid
+            ? Math.max(0, (1 - (target * MB) / selected.size) * 100).toFixed(
+                1
+              ) + "%"
+            : "—";
+          $("targetHint").textContent = !valid
+            ? "Masukkan target yang lebih kecil dari ukuran asli."
+            : videoRate < 80000
+            ? "Target terlalu kecil. Naikkan ukuran atau hapus audio."
+            : "Estimasi bitrate video: " +
+              Math.round(videoRate / 1000).toLocaleString("id-ID") +
+              " kbps" +
+              ($("audio").value === "copy"
+                ? " (audio dihitung saat mulai)"
+                : "");
+          $("engineInfo").textContent =
+            $("mode").value === "native"
+              ? "Mode cepat menggunakan WebCodecs dan hardware jika tersedia. Resolusi otomatis menyesuaikan target; pilih Sama seperti asli untuk mempertahankan resolusi."
+              : $("mode").value === "wasm2"
+              ? "Dua tahap FFmpeg jauh lebih lambat. Gunakan hanya jika memerlukan ukuran lebih terkontrol."
+              : "FFmpeg satu tahap dengan preset ultrafast/veryfast. Lebih kompatibel, tetapi tetap lebih lambat dari encoder browser.";
+          document
+            .querySelectorAll("[data-ratio]")
+            .forEach((b) =>
+              b.classList.toggle(
+                "active",
+                Math.abs(
+                  target -
+                    Math.max(
+                      0.1,
+                      Math.round(
+                        (selected.size / MB) * Number(b.dataset.ratio) * 10
+                      ) / 10
+                    )
+                ) < 0.05
+              )
+            );
+          $("compress").disabled = busy || !valid || videoRate < 80000;
+        }
+        function readMetadata(url) {
+          return new Promise((resolve, reject) => {
+            const video = document.createElement("video");
+            const timeout = setTimeout(
+              () =>
+                finish(
+                  new Error(
+                    "Pembacaan metadata terlalu lama. Coba file MP4 lain."
+                  )
+                ),
+              20000
+            );
+            function finish(err) {
+              clearTimeout(timeout);
+              video.onloadedmetadata = null;
+              video.onerror = null;
+              const data = {
+                duration: video.duration,
+                width: video.videoWidth,
+                height: video.videoHeight,
+              };
+              video.removeAttribute("src");
+              video.load();
+              err ? reject(err) : resolve(data);
+            }
+            video.preload = "metadata";
+            video.onloadedmetadata = () => {
+              if (
+                !Number.isFinite(video.duration) ||
+                video.duration <= 0 ||
+                !video.videoWidth ||
+                !video.videoHeight
+              )
+                finish(
+                  new Error(
+                    "Durasi atau resolusi video tidak dapat dibaca. Coba MP4 H.264."
+                  )
+                );
+              else finish();
+            };
+            video.onerror = () =>
+              finish(
+                new Error(
+                  "Browser tidak dapat membaca video ini. Coba MP4 H.264 atau WebM."
+                )
+              );
+            video.src = url;
+          });
+        }
+        async function selectFile(file) {
+          if (busy || selecting || !file) return;
+          error("");
+          if (
+            !file.size ||
+            (!file.type.startsWith("video/") &&
+              !/\.(mp4|mov|m4v|webm|mkv|avi)$/i.test(file.name))
+          )
+            return error("Pilih satu file video yang valid.");
+          if (file.size > 1.5 * 1024 ** 3)
+            return error(
+              "File di atas 1,5 GB tidak didukung pada alat ini karena batas memori browser."
+            );
+          const id = ++selectionId;
+          selecting = true;
+          $("chooseFile").disabled = true;
+          $("fileInput").disabled = true;
+          $("chooseFile").textContent = "Membaca video…";
+          $("compress").disabled = true;
+          const url = URL.createObjectURL(file);
+          try {
+            const info = await readMetadata(url);
+            if (id !== selectionId) {
+              URL.revokeObjectURL(url);
+              return;
+            }
+            clearOutput();
+            $("process").hidden = true;
+            $("inputPreview").pause();
+            if (inputURL) URL.revokeObjectURL(inputURL);
+            inputURL = url;
+            selected = file;
+            meta = info;
+            $("inputPreview").src = inputURL;
+            $("fileName").textContent = file.name;
+            $("fileInfo").textContent = file.type || "Video lokal";
+            $("originalSize").textContent = size(file.size);
+            $("duration").textContent = durationText(info.duration);
+            $("dimensions").textContent = info.width + " × " + info.height;
+            $("dropZone").hidden = true;
+            $("formatNote").hidden = true;
+            $("filePanel").hidden = false;
+            $("largeWarning").hidden = file.size < 250 * MB;
+            $("targetMB").value = Math.max(
+              0.1,
+              Math.round((file.size / MB) * 0.5 * 10) / 10
+            );
+            $("settings").disabled = false;
+            updateEstimate();
+          } catch (e) {
+            URL.revokeObjectURL(url);
+            error(e.message);
+          } finally {
+            selecting = false;
+            $("chooseFile").disabled = false;
+            $("fileInput").disabled = false;
+            $("chooseFile").textContent = "Pilih video →";
+            $("fileInput").value = "";
+            refreshSelects();
+            updateEstimate();
+          }
+        }
+        function removeFile() {
+          if (busy || selecting) return;
+          ++selectionId;
+          selected = null;
+          meta = null;
+          clearOutput();
+          $("inputPreview").pause();
+          $("inputPreview").removeAttribute("src");
+          $("inputPreview").load();
+          if (inputURL) URL.revokeObjectURL(inputURL);
+          inputURL = "";
+          $("fileInput").value = "";
+          $("filePanel").hidden = true;
+          $("dropZone").hidden = false;
+          $("formatNote").hidden = false;
+          $("settings").disabled = true;
+          $("compress").disabled = true;
+          $("process").hidden = true;
+          $("savingEstimate").textContent = "—";
+          $("targetHint").textContent =
+            "Pilih video untuk menghitung estimasi bitrate.";
+          error("");
+        }
+        function showProgress(value, indeterminate = false) {
+          progress = Math.max(progress, Math.min(100, value));
+          $("bar").style.width = progress + "%";
+          $("track").classList.toggle("indeterminate", indeterminate);
+          if (indeterminate) $("track").removeAttribute("aria-valuenow");
+          else
+            $("track").setAttribute(
+              "aria-valuenow",
+              String(Math.round(progress))
+            );
+          $("progressText").textContent = indeterminate
+            ? progress >= 95
+              ? "Finalisasi…"
+              : "Memuat…"
+            : Math.floor(progress) + "%";
+        }
+        function encodeProgress(seconds) {
+          if (!pass || !meta || !Number.isFinite(seconds)) return;
+          const fraction = Math.min(
+            0.995,
+            Math.max(0, seconds / meta.duration)
+          );
+          showProgress(10 + ((pass - 1 + fraction) / passes) * 84);
+        }
+        async function script() {
+          if (window.FFmpegWASM) return;
+          if (!scriptPromise)
+            scriptPromise = new Promise((resolve, reject) => {
+              const el = document.createElement("script");
+              el.src = WRAPPER + "/ffmpeg.js";
+              el.crossOrigin = "anonymous";
+              const t = setTimeout(() => {
+                el.remove();
+                scriptPromise = null;
+                reject(
+                  new Error(
+                    "CDN tidak merespons. Periksa koneksi lalu coba lagi."
+                  )
+                );
+              }, 45000);
+              el.onload = () => {
+                clearTimeout(t);
+                resolve();
+              };
+              el.onerror = () => {
+                clearTimeout(t);
+                el.remove();
+                scriptPromise = null;
+                reject(
+                  new Error(
+                    "Mesin kompresi gagal dimuat dari CDN. Periksa koneksi atau pemblokir konten."
+                  )
+                );
+              };
+              document.head.appendChild(el);
+            });
+          return scriptPromise;
+        }
+        async function fetchBlob(url, type, signal) {
+          const response = await fetch(url, { signal });
+          if (!response.ok)
+            throw new Error(
+              "Gagal memuat mesin kompresi (HTTP " + response.status + ")."
+            );
+          const blob = new Blob([await response.arrayBuffer()], { type });
+          const objectURL = URL.createObjectURL(blob);
+          assetURLs.push(objectURL);
+          return objectURL;
+        }
+        function disposeEngine() {
+          if (nativeWorker) {
+            nativeWorker.terminate();
+            nativeWorker = null;
+          }
+          if (rejectTask) {
+            const reject = rejectTask;
+            rejectTask = null;
+            reject(new Error(abortReason || "Cancelled"));
+          }
+          if (engine) {
+            try {
+              engine.terminate();
+            } catch (_) {}
+            engine = null;
+          }
+          if (controller) {
+            controller.abort();
+            controller = null;
+          }
+          assetURLs.forEach((url) => URL.revokeObjectURL(url));
+          assetURLs = [];
+          if (timer) clearInterval(timer);
+          timer = null;
+          pass = 0;
+        }
+        function settingsConfig() {
+          return {
+            file: selected,
+            duration: meta.duration,
+            target: Number($("targetMB").value) * MB,
+            resolution: $("resolution").value,
+            fps: $("fps").value,
+            audio: $("audio").value,
+            preset: $("preset").value,
+            mode: $("mode").value,
+          };
+        }
+        function markActivity() {
+          lastActivity = Date.now();
+          $("stallWarning").hidden = true;
+        }
+        function phase(text) {
+          $("stage").textContent = text;
+          markActivity();
+        }
+        function startWatchdog() {
+          timer = setInterval(() => {
+            const seconds = (Date.now() - startedAt) / 1000;
+            $("elapsed").textContent =
+              "Waktu berjalan " +
+              durationText(seconds) +
+              " · Biarkan tab aktif.";
+            if (document.hidden) {
+              lastActivity = Date.now();
+              return;
+            }
+            const idle = (Date.now() - lastActivity) / 1000;
+            $("stallWarning").hidden = idle < 20;
+            if (idle >= 20)
+              $("stallWarning").textContent =
+                "Belum ada kemajuan baru selama " +
+                Math.floor(idle) +
+                " detik. Proses akan dihentikan jika tidak bergerak selama 90 detik.";
+            if (idle >= 90) {
+              abortReason =
+                "Proses dihentikan karena tidak ada kemajuan selama 90 detik. Coba resolusi 720p atau mode kompresi lain.";
+              disposeEngine();
+            }
+          }, 1000);
+        }
+        function nativeCompress(config, id) {
+          return new Promise((resolve, reject) => {
+            const code = $("nativeWorker").textContent;
+            const url = URL.createObjectURL(
+              new Blob([code], { type: "text/javascript" })
+            );
+            assetURLs.push(url);
+            nativeWorker = new Worker(url, { type: "module" });
+            rejectTask = reject;
+            nativeWorker.onerror = (e) => {
+              rejectTask = null;
+              reject(
+                new Error(
+                  e.message ||
+                    "Worker WebCodecs gagal dijalankan. Periksa koneksi CDN dan dukungan browser."
+                )
+              );
+            };
+            nativeWorker.onmessage = ({ data: d }) => {
+              if (id !== taskId) return;
+              if (d.type === "phase") {
+                phase(d.text);
+                if (d.finalizing) showProgress(98, true);
+                else if (d.encoding) {
+                  encodeStarted = Date.now();
+                  showProgress(5);
+                }
+              } else if (d.type === "config") {
+                actualConfig = d;
+                $("liveDetail").textContent =
+                  d.engine +
+                  " · " +
+                  d.width +
+                  " × " +
+                  d.height +
+                  " · " +
+                  d.fps.toFixed(1) +
+                  " fps";
+                markActivity();
+              } else if (d.type === "progress") {
+                if (d.seconds > processedSeconds + 0.001) {
+                  processedSeconds = d.seconds;
+                  markActivity();
+                }
+                showProgress(5 + Math.min(1, d.fraction) * 92);
+                const elapsedEncode = Math.max(
+                  0.1,
+                  (Date.now() - encodeStarted) / 1000
+                );
+                const speed = processedSeconds / elapsedEncode;
+                const eta =
+                  speed > 0.01 && elapsedEncode > 2
+                    ? " · Perkiraan sisa " +
+                      durationText(
+                        Math.max(0, d.duration - processedSeconds) / speed
+                      )
+                    : "";
+                $("liveDetail").textContent =
+                  (actualConfig?.engine || "WebCodecs") +
+                  " · Video diproses " +
+                  durationText(Math.min(processedSeconds, d.duration)) +
+                  " / " +
+                  durationText(d.duration) +
+                  eta;
+                if (d.fraction >= 0.999)
+                  $("stage").textContent = "Merampungkan encoder dan file MP4…";
+              } else if (d.type === "done") {
+                rejectTask = null;
+                resolve({
+                  blob: new Blob([d.buffer], { type: "video/mp4" }),
+                  info: d,
+                });
+              } else if (d.type === "error") {
+                rejectTask = null;
+                reject(new Error(d.message));
+              }
+            };
+            nativeWorker.postMessage(config);
+          });
+        }
+        async function wasmCompress(c, id) {
+          const check = () => {
+            if (id !== taskId) throw new Error("Cancelled");
+          };
+          phase("Memuat FFmpeg · mode ini lebih lambat…");
+          showProgress(0, true);
+          controller = new AbortController();
+          const signal = controller.signal;
+          await script();
+          check();
+          const urls = await Promise.all([
+            fetchBlob(WRAPPER + "/814.ffmpeg.js", "text/javascript", signal),
+            fetchBlob(CORE + "/ffmpeg-core.js", "text/javascript", signal),
+            fetchBlob(CORE + "/ffmpeg-core.wasm", "application/wasm", signal),
+          ]);
+          check();
+          engine = new window.FFmpegWASM.FFmpeg();
+          // Use encoded media timestamps from FFmpeg logs. Do not use its optimistic
+          // global progress event, which can reach the end before the file is ready.
+          engine.on("log", ({ message }) => {
+            if (id !== taskId) return;
+            logs.push(message);
+            if (logs.length > 50) logs.shift();
+            const t = message.match(/time=(\d+):(\d+):(\d+(?:\.\d+)?)/);
+            if (t && pass) {
+              const seconds =
+                Number(t[1]) * 3600 + Number(t[2]) * 60 + Number(t[3]);
+              if (seconds > processedSeconds + 0.001) {
+                processedSeconds = seconds;
+                markActivity();
+              }
+              encodeProgress(seconds);
+              $("liveDetail").textContent =
+                "FFmpeg · Tahap " +
+                pass +
+                "/" +
+                passes +
+                " · Video " +
+                durationText(Math.min(seconds, c.duration)) +
+                " / " +
+                durationText(c.duration);
+            }
+          });
+          await engine.load({
+            classWorkerURL: urls[0],
+            coreURL: urls[1],
+            wasmURL: urls[2],
+          });
+          check();
+          phase("Menyiapkan video…");
+          showProgress(3);
+          const ext = (selected.name.match(/\.([a-z0-9]+)$/i) || [
+            ,
+            "mp4",
+          ])[1].toLowerCase();
+          const inputName = "input." + ext;
+          // Read the File lazily through WORKERFS when available, avoiding a full input copy.
+          let inputPath;
+          await engine.createDir("/source");
+          if (
+            await engine.mount(
+              "WORKERFS",
+              { blobs: [{ name: inputName, data: selected }] },
+              "/source"
+            )
+          )
+            inputPath = "/source/" + inputName;
+          else {
+            const bytes = new Uint8Array(await selected.arrayBuffer());
+            check();
+            await engine.writeFile(inputName, bytes);
+            inputPath = inputName;
+          }
+          check();
+          let audioRate = c.audio === "copy" ? 128000 : Number(c.audio) * 1000;
+          if (c.audio === "copy") {
+            logs = [];
+            await engine.exec(["-i", inputPath]);
+            check();
+            const audioLine = logs.find((line) => /Audio:/.test(line));
+            if (!audioLine) audioRate = 0;
+            else {
+              const rates = [...audioLine.matchAll(/(\d+)\s*kb\/s/g)];
+              if (rates.length)
+                audioRate = Number(rates[rates.length - 1][1]) * 1000;
+            }
+          }
+          const bitrate = Math.floor(
+            (c.target * 8 * 0.94) / c.duration - audioRate
+          );
+          if (bitrate < 80000)
+            throw Error(
+              "Target terlalu kecil setelah memperhitungkan audio. Naikkan target atau hapus audio."
+            );
+          let edge =
+            c.resolution === "auto"
+              ? c.preset === "fast"
+                ? 1280
+                : 1920
+              : Number(c.resolution);
+          if (c.resolution === "auto") {
+            const ratio = meta.width / meta.height;
+            const pixels = bitrate / (30 * 0.075);
+            edge = Math.min(
+              edge,
+              Math.max(320, Math.sqrt(pixels * Math.max(ratio, 1 / ratio)))
+            );
+          }
+          const factor = edge
+            ? "min(1," + Math.floor(edge) + "/max(iw,ih))"
+            : "1";
+          const filter =
+            "scale=w='trunc(iw*" +
+            factor +
+            "/2)*2':h='trunc(ih*" +
+            factor +
+            "/2)*2'" +
+            (c.fps === "auto" ? ",fps='min(source_fps,30)'" : "");
+          const preset = c.preset === "fast" ? "ultrafast" : "veryfast";
+          const common = [
+            "-i",
+            inputPath,
+            "-map",
+            "0:v:0",
+            "-sn",
+            "-dn",
+            "-vf",
+            filter,
+            "-c:v",
+            "libx264",
+            "-preset",
+            preset,
+            "-b:v",
+            String(bitrate),
+            "-pix_fmt",
+            "yuv420p",
+          ];
+          if (c.fps !== "0" && c.fps !== "auto") common.push("-r", c.fps);
+          const audio =
+            c.audio === "0"
+              ? ["-an"]
+              : c.audio === "copy"
+              ? ["-map", "0:a:0?", "-c:a", "copy"]
+              : ["-map", "0:a:0?", "-c:a", "aac", "-b:a", String(audioRate)];
+          passes = c.mode === "wasm2" ? 2 : 1;
+          if (passes === 2) {
+            pass = 1;
+            processedSeconds = 0;
+            phase("Tahap 1/2 · Menganalisis video");
+            showProgress(10);
+            const rc = await engine.exec([
+              ...common,
+              "-pass",
+              "1",
+              "-passlogfile",
+              "encode",
+              "-an",
+              "-f",
+              "null",
+              "-y",
+              "/dev/null",
+            ]);
+            check();
+            if (rc !== 0)
+              throw Error("Analisis FFmpeg gagal. Coba mode satu tahap.");
+          }
+          pass = passes;
+          processedSeconds = 0;
+          phase(
+            passes === 2
+              ? "Tahap 2/2 · Mengompres video"
+              : "Mengompres dengan FFmpeg cepat…"
+          );
+          showProgress(passes === 2 ? 52 : 10);
+          const passArgs =
+            passes === 2 ? ["-pass", "2", "-passlogfile", "encode"] : [];
+          const rc = await engine.exec([
+            ...common,
+            ...passArgs,
+            ...audio,
+            "-map_metadata",
+            "-1",
+            "-movflags",
+            "+faststart",
+            "-y",
+            "output.mp4",
+          ]);
+          check();
+          if (rc !== 0)
+            throw Error(
+              "Kompresi FFmpeg gagal. Coba audio 96 kbps atau file lebih kecil."
+            );
+          pass = 0;
+          phase("Menyiapkan file hasil…");
+          showProgress(96, true);
+          const bytes = await engine.readFile("output.mp4");
+          check();
+          return {
+            blob: new Blob([bytes], { type: "video/mp4" }),
+            info: { engine: "FFmpeg" },
+          };
+        }
+        async function presentResult(blob, info, config, id) {
+          if (!blob.size) throw Error("File hasil kosong.");
+          phase("Memvalidasi hasil video…");
+          showProgress(99, true);
+          const url = URL.createObjectURL(blob);
+          let outputMeta;
+          try {
+            outputMeta = await readMetadata(url);
+          } catch (e) {
+            URL.revokeObjectURL(url);
+            throw Error("Hasil MP4 belum dapat dibaca browser: " + e.message);
+          }
+          if (id !== taskId) {
+            URL.revokeObjectURL(url);
+            return;
+          }
+          if (
+            outputMeta.duration <
+            meta.duration - Math.max(0.5, meta.duration * 0.02)
+          ) {
+            URL.revokeObjectURL(url);
+            throw Error("Durasi hasil tidak lengkap. Coba mode FFmpeg.");
+          }
+          outputBlob = blob;
+          outputURL = url;
+          $("outputPreview").src = url;
+          const name =
+            (selected.name.replace(/\.[^.]+$/, "") || "video") +
+            "-compressed.mp4";
+          $("download").href = url;
+          $("download").download = name;
+          $("regularDownload").href = url;
+          $("regularDownload").download = name;
+          $("resultOriginal").textContent = size(selected.size);
+          $("resultSize").textContent = size(blob.size);
+          const reduction = (1 - blob.size / selected.size) * 100;
+          $("resultSaving").textContent =
+            Math.max(0, reduction).toFixed(1) + "%";
+          $("resultTitle").textContent = "Videomu siap disimpan.";
+          const sizeNote =
+            blob.size > config.target * 1.03
+              ? "Hasil melebihi target. Bitrate encoder browser tidak selalu presisi; turunkan target bila perlu."
+              : "Ukuran aktual " +
+                size(blob.size) +
+                " dari target " +
+                size(config.target) +
+                ".";
+          $("resultNote").textContent =
+            sizeNote +
+            " · " +
+            outputMeta.width +
+            " × " +
+            outputMeta.height +
+            " · " +
+            durationText(outputMeta.duration);
+          $("saveStatus").textContent =
+            "Kompresi berhasil. Klik Download video untuk menyimpan file.";
+          $("saveStatus").classList.remove("saved");
+          $("regularDownload").hidden = true;
+          $("result").hidden = false;
+          showProgress(100);
+          $("stage").textContent = "Selesai · MP4 sudah diverifikasi";
+          $("elapsed").textContent =
+            "Selesai dalam " +
+            durationText((Date.now() - startedAt) / 1000) +
+            ".";
+          $("liveDetail").textContent =
+            (info.engine || actualConfig?.engine || "Encoder browser") +
+            " · File hasil: " +
+            size(blob.size);
+          $("result").scrollIntoView({
+            behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+              ? "instant"
+              : "smooth",
+            block: "nearest",
+          });
+        }
+        async function compress() {
+          if (busy || selecting || !selected || !meta) return;
+          error("");
+          const c = settingsConfig();
+          if (
+            !Number.isFinite(c.target) ||
+            c.target <= 0 ||
+            c.target >= selected.size
+          )
+            return error("Target harus lebih kecil dari ukuran asli.");
+          if (
+            c.mode === "native" &&
+            (!window.isSecureContext ||
+              !window.VideoEncoder ||
+              !window.VideoDecoder)
+          )
+            return error(
+              "Mode cepat memerlukan WebCodecs. Gunakan Chrome/Edge terbaru melalui localhost/HTTPS, atau pilih mode FFmpeg."
+            );
+          const id = ++taskId;
+          setBusy(true);
+          clearOutput();
+          closeSelect();
+          $("inputPreview").pause();
+          progress = 0;
+          pass = 0;
+          processedSeconds = 0;
+          actualConfig = null;
+          abortReason = "";
+          logs = [];
+          startedAt = Date.now();
+          lastActivity = startedAt;
+          encodeStarted = startedAt;
+          $("process").hidden = false;
+          $("cancel").hidden = false;
+          $("stallWarning").hidden = true;
+          $("liveDetail").textContent = "";
+          phase("Menyiapkan kompresi…");
+          showProgress(0, true);
+          startWatchdog();
+          try {
+            const result =
+              c.mode === "native"
+                ? await nativeCompress(c, id)
+                : await wasmCompress(c, id);
+            if (id !== taskId) return;
+            await presentResult(result.blob, result.info, c, id);
+          } catch (e) {
+            if (id !== taskId) return;
+            console.error("Compression error:", e, logs.join("\n"));
+            const message = abortReason || String(e?.message || e);
+            error(message);
+            $("stage").textContent =
+              "Proses gagal · belum ada file siap download";
+            $("track").classList.remove("indeterminate");
+            $("progressText").textContent = "Gagal";
+            $("elapsed").textContent =
+              "Video asli tetap tersedia. Ubah pengaturan untuk mencoba lagi.";
+            $("stallWarning").hidden = true;
+          } finally {
+            if (id === taskId) {
+              disposeEngine();
+              setBusy(false);
+              updateEstimate();
+              refreshSelects();
+              $("cancel").hidden = true;
+            }
+          }
+        }
+        function cancel() {
+          if (!busy) return;
+          ++taskId;
+          disposeEngine();
+          setBusy(false);
+          updateEstimate();
+          refreshSelects();
+          $("stage").textContent = "Kompresi dibatalkan";
+          $("progressText").textContent = "Dibatalkan";
+          $("track").classList.remove("indeterminate");
+          $("cancel").hidden = true;
+          $("stallWarning").hidden = true;
+          $("elapsed").textContent =
+            "Video asli tetap tersedia. Kamu bisa mencoba lagi.";
+        }
+        $("download").addEventListener("click", async (e) => {
+          if (!outputBlob || !outputURL) {
+            e.preventDefault();
+            return;
+          }
+          const blobToSave = outputBlob,
+            name = $("download").download;
+          if ("showSaveFilePicker" in window && window.isSecureContext) {
+            e.preventDefault();
+            try {
+              const handle = await window.showSaveFilePicker({
+                suggestedName: name,
+                types: [
+                  {
+                    description: "MP4 Video",
+                    accept: { "video/mp4": [".mp4"] },
+                  },
+                ],
+              });
+              $("saveStatus").textContent = "Sedang menulis file ke perangkat…";
+              const writable = await handle.createWritable();
+              try {
+                await writable.write(blobToSave);
+                await writable.close();
+              } catch (err) {
+                try {
+                  await writable.abort();
+                } catch (_) {}
+                throw err;
+              }
+              $("saveStatus").textContent =
+                "Berhasil disimpan: " +
+                handle.name +
+                " (" +
+                size(blobToSave.size) +
+                ").";
+              $("saveStatus").classList.add("saved");
+            } catch (err) {
+              $("saveStatus").textContent =
+                err.name === "AbortError"
+                  ? "Penyimpanan dibatalkan. Hasil masih tersedia untuk didownload."
+                  : "File belum tersimpan: " +
+                    err.message +
+                    ". Gunakan Download melalui browser di bawah.";
+              if (err.name !== "AbortError")
+                $("regularDownload").hidden = false;
+            }
+          } else {
+            $("saveStatus").textContent =
+              "Download dimulai. Periksa daftar Downloads browser untuk memastikan file selesai tersimpan.";
+          }
+        });
+        $("regularDownload").addEventListener("click", () => {
+          $("saveStatus").textContent =
+            "Download dimulai. Periksa daftar Downloads browser untuk memastikan file selesai tersimpan.";
+        });
+
+        // Accessible custom listboxes, portaled to body so panel overflow cannot clip them.
+        const customSelects = [];
+        let openSelect = null;
+        function closeSelect() {
+          if (!openSelect) return;
+          openSelect.menu.hidden = true;
+          openSelect.trigger.setAttribute("aria-expanded", "false");
+          openSelect.trigger.removeAttribute("aria-activedescendant");
+          openSelect = null;
+        }
+        function refreshSelects() {
+          customSelects.forEach((s) => {
+            const shouldDisable = s.select.matches(":disabled");
+            // Hanya ubah jika berbeda, supaya MutationObserver tidak loop tanpa henti
+            if (s.trigger.disabled !== shouldDisable) {
+              s.trigger.disabled = shouldDisable;
+            }
+            const text = s.select.selectedOptions[0]?.textContent || "";
+            if (s.value.textContent !== text) {
+              s.value.textContent = text;
+            }
+          });
+          if (openSelect?.trigger.disabled) closeSelect();
+        }
+        document.querySelectorAll("select").forEach((select) => {
+          const wrapper = document.createElement("div");
+          wrapper.className = "select-control";
+          select.before(wrapper);
+          wrapper.appendChild(select);
+          select.hidden = true;
+          select.tabIndex = -1;
+          const trigger = document.createElement("button");
+          trigger.type = "button";
+          trigger.className = "select-trigger";
+          trigger.id = select.id + "-trigger";
+          trigger.setAttribute("role", "combobox");
+          trigger.setAttribute("aria-haspopup", "listbox");
+          trigger.setAttribute("aria-expanded", "false");
+          trigger.innerHTML =
+            '<span class="select-value"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+          const label = document.querySelector(
+            'label[for="' + select.id + '"]'
+          );
+          if (label) {
+            label.htmlFor = trigger.id;
+            label.id = select.id + "-label";
+            trigger.setAttribute("aria-labelledby", label.id);
+          }
+          const menu = document.createElement("div");
+          menu.className = "select-menu";
+          menu.id = select.id + "-listbox";
+          menu.setAttribute("role", "listbox");
+          menu.hidden = true;
+          if (label) menu.setAttribute("aria-labelledby", label.id);
+          trigger.setAttribute("aria-controls", menu.id);
+          wrapper.appendChild(trigger);
+          document.body.appendChild(menu);
+          const state = {
+            select,
+            trigger,
+            menu,
+            value: trigger.querySelector(".select-value"),
+            active: select.selectedIndex,
+            options: [],
+          };
+          function activate(index) {
+            state.active = Math.max(
+              0,
+              Math.min(select.options.length - 1, index)
+            );
+            state.options.forEach((node, n) => {
+              node.classList.toggle("is-active", n === state.active);
+              node.setAttribute(
+                "aria-selected",
+                String(n === select.selectedIndex)
+              );
+            });
+            trigger.setAttribute(
+              "aria-activedescendant",
+              state.options[state.active].id
+            );
+            state.options[state.active].scrollIntoView({ block: "nearest" });
+          }
+          function choose(index) {
+            select.selectedIndex = index;
+            select.dispatchEvent(new Event("input", { bubbles: true }));
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+            refreshSelects();
+            closeSelect();
+            trigger.focus({ preventScroll: true });
+          }
+          Array.from(select.options).forEach((option, i) => {
+            const node = document.createElement("div");
+            node.className = "select-option";
+            node.id = select.id + "-option-" + i;
+            node.textContent = option.textContent;
+            node.setAttribute("role", "option");
+            node.setAttribute(
+              "aria-selected",
+              String(i === select.selectedIndex)
+            );
+            node.addEventListener("mousedown", (e) => e.preventDefault());
+            node.addEventListener("click", () => choose(i));
+            node.addEventListener("pointermove", () => activate(i));
+            menu.appendChild(node);
+            state.options.push(node);
+          });
+          function open() {
+            if (trigger.disabled) return;
+            closeSelect();
+            openSelect = state;
+            menu.hidden = false;
+            trigger.setAttribute("aria-expanded", "true");
+            const r = trigger.getBoundingClientRect(),
+              vh = window.innerHeight;
+            const roomBelow = vh - r.bottom - 12,
+              roomAbove = r.top - 12;
+            const above = roomBelow < 170 && roomAbove > roomBelow;
+            menu.style.width = Math.min(r.width, window.innerWidth - 24) + "px";
+            menu.style.left =
+              Math.max(12, Math.min(r.left, window.innerWidth - r.width - 12)) +
+              "px";
+            menu.style.maxHeight =
+              Math.max(80, Math.min(290, above ? roomAbove : roomBelow)) + "px";
+            menu.style.top = above ? "auto" : r.bottom + 6 + "px";
+            menu.style.bottom = above ? vh - r.top + 6 + "px" : "auto";
+            activate(select.selectedIndex);
+          }
+          trigger.addEventListener("click", () =>
+            openSelect === state ? closeSelect() : open()
+          );
+          let typed = "",
+            typedAt = 0;
+          trigger.addEventListener("keydown", (e) => {
+            if (
+              [
+                "ArrowDown",
+                "ArrowUp",
+                "Home",
+                "End",
+                "Escape",
+                "Enter",
+                " ",
+              ].includes(e.key)
+            ) {
+              e.preventDefault();
+              if (e.key === "Escape") return closeSelect();
+              if (e.key === "Enter" || e.key === " ")
+                return openSelect === state ? choose(state.active) : open();
+              if (openSelect !== state) open();
+              activate(
+                e.key === "Home"
+                  ? 0
+                  : e.key === "End"
+                  ? select.options.length - 1
+                  : state.active + (e.key === "ArrowUp" ? -1 : 1)
+              );
+            } else if (e.key === "Tab") closeSelect();
+            else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+              e.preventDefault();
+              if (openSelect !== state) open();
+              typed = performance.now() - typedAt > 700 ? e.key : typed + e.key;
+              typedAt = performance.now();
+              const index = Array.from(select.options).findIndex((o) =>
+                o.text.toLowerCase().startsWith(typed.toLowerCase())
+              );
+              if (index >= 0) activate(index);
+            }
+          });
+          select.addEventListener("change", refreshSelects);
+          customSelects.push(state);
+        });
+        document.addEventListener("pointerdown", (e) => {
+          if (
+            openSelect &&
+            !openSelect.trigger.contains(e.target) &&
+            !openSelect.menu.contains(e.target)
+          )
+            closeSelect();
+        });
+        document.addEventListener("focusin", (e) => {
+          if (
+            openSelect &&
+            !openSelect.trigger.contains(e.target) &&
+            !openSelect.menu.contains(e.target)
+          )
+            closeSelect();
+        });
+        window.addEventListener("resize", closeSelect);
+        window.addEventListener(
+          "scroll",
+          (e) => {
+            if (
+              openSelect &&
+              e.target !== openSelect.menu &&
+              !openSelect.menu.contains(e.target)
+            )
+              closeSelect();
+          },
+          true
+        );
+        new MutationObserver(refreshSelects).observe($("settings"), {
+          attributes: true,
+          attributeFilter: ["disabled"],
+          subtree: true,
+        });
+        refreshSelects();
+
+        $("chooseFile").addEventListener("click", () => $("fileInput").click());
+        $("fileInput").addEventListener("change", (e) =>
+          selectFile(e.target.files[0])
+        );
+        $("removeFile").addEventListener("click", removeFile);
+        $("compress").addEventListener("click", () => {
+          $("cancel").hidden = false;
+          compress();
+        });
+        $("cancel").addEventListener("click", cancel);
+        $("again").addEventListener("click", () => {
+          clearOutput();
+          $("settingsHeading").scrollIntoView({
+            block: "center",
+            behavior: "smooth",
+          });
+          $("targetMB").focus({ preventScroll: true });
+        });
+        $("settings").addEventListener("input", updateEstimate);
+        $("settings").addEventListener("change", updateEstimate);
+        document.querySelectorAll("[data-ratio]").forEach((button) =>
+          button.addEventListener("click", () => {
+            if (!selected || busy) return;
+            $("targetMB").value = Math.max(
+              0.1,
+              Math.round(
+                (selected.size / MB) * Number(button.dataset.ratio) * 10
+              ) / 10
+            );
+            updateEstimate();
+          })
+        );
+        let dragDepth = 0;
+        $("dropZone").addEventListener("dragenter", (e) => {
+          e.preventDefault();
+          if (!busy) {
+            dragDepth++;
+            $("dropZone").classList.add("over");
+          }
+        });
+        $("dropZone").addEventListener("dragover", (e) => {
+          e.preventDefault();
+          if (e.dataTransfer)
+            e.dataTransfer.dropEffect = busy ? "none" : "copy";
+        });
+        $("dropZone").addEventListener("dragleave", (e) => {
+          e.preventDefault();
+          dragDepth = Math.max(0, dragDepth - 1);
+          if (!dragDepth) $("dropZone").classList.remove("over");
+        });
+        $("dropZone").addEventListener("drop", (e) => {
+          e.preventDefault();
+          dragDepth = 0;
+          $("dropZone").classList.remove("over");
+          if (busy || selecting) return;
+          if (e.dataTransfer.files.length !== 1)
+            return error("Pilih satu video untuk setiap proses kompresi.");
+          selectFile(e.dataTransfer.files[0]);
+        });
+        // Stop files dropped outside the drop zone from navigating away from this page.
+        window.addEventListener("dragover", (e) => {
+          if (Array.from(e.dataTransfer?.types || []).includes("Files"))
+            e.preventDefault();
+        });
+        window.addEventListener("drop", (e) => {
+          if (Array.from(e.dataTransfer?.types || []).includes("Files"))
+            e.preventDefault();
+        });
+        window.addEventListener("beforeunload", (e) => {
+          if (busy) {
+            e.preventDefault();
+            e.returnValue = "";
+          }
+        });
+        window.addEventListener("pagehide", () => {
+          if (busy) cancel();
+        });
+      })();
+    </script>
+  </body>
+</html>
